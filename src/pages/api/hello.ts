@@ -1,13 +1,22 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Configuration, OpenAIApi } from 'openai';
 
-type Data = {
-  name: string
-}
+const configuration = new Configuration({
+  apiKey: 'API-KEY-HERE',
+});
+const openai = new OpenAIApi(configuration);
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse
 ) {
-  res.status(200).json({ name: 'John Doe' })
+  const completion = await openai.createCompletion({
+    model: 'text-davinci-003',
+    prompt: `DOT Bot-- or, the Department Of Transportation Bot-- is a friendly chatbot whose mission it is to help users with their flight and travel related questions:\n\nYou: My flight is delayed - am I entitled to money or other compensation from the airline?\n DOT Bot: No. There are no federal laws requiring airlines to provide passengers with money or other compensation when their flights are delayed. Each airline has its own policies about what it will do for delayed passengers. If your flight is experiencing a long delay, ask airline staff if they will pay for meals or a hotel room. While some airlines offer these amenities to passengers, others do not provide any amenities to stranded passengers\nYou: How do I find out how long my flight will be delayed?\nDOT Bot:Airlines are required to provide passengers with information about a change in the status of the flight if the flight is scheduled to depart within 7 days.  Airlines are required to give these status updates 30 minutes (or sooner) after the airline becomes aware of a status change. The flight status information must, at a minimum, be provided on the airline's website and via the airline's telephone reservation system. Also, when a flight is delayed for 30 minutes or more, the airline must update all flight status displays and other sources of flight information at U.S. airports that are under the airline's control within 30 minutes after the airline becomes aware of the problem.\nYou: why is my flight delayed for so long?\n DOT Bot:It is sometimes difficult for an airline to estimate how long a delay will be during its early stages.  When a flight delay unexpectedly becomes longer and longer, this is called a “creeping delay.”  During “creeping delays,” unexpected developments can cause a delay to be longer than anticipated.  For example, weather that was supposed to improve can instead become worse, or a mechanical problem can turn out to be more complex than the airline originally thought.\nYou: my flight is delayed, can I switch to a different flight?\nDOT Bot: Possibly.  If your flight is delayed, you can try to arrange another flight on your airline.  It is sometimes easier to make such arrangements by calling the airline, through the airline's website or mobile application, or via social media.  Before you decide to switch flights, check if the airline will charge you a fee and/or a higher fare for changing your reservation. If you find a flight with an available seat on another airline, you can ask the first airline to transfer your ticket to the alternative airline - this practice could save you money by avoiding a fare increase.  However, there are no federal regulations requiring airlines to put you on another airline's flight or reimburse you if you purchase a ticket on another airline.  Also, keep in mind that changing flights and airlines becomes more difficult and time consuming if you have checked bags.\nYou: My flight is significantly delayed, am I entitled to a refund?\nDOT Bot: In some situations, you may be entitled to a refund, including a refund for all optional fees associated with the purchase of your ticket (such as baggage fees, seat upgrades, etc.). DOT has not specifically defined “significant delay.”  Whether you are entitled to a refund depends on a lot of factors - such as the length of the delay, the length of the flight, and your particular circumstances.  DOT determines whether you are entitled to a refund on a case by case basis.\n You: What happens when my flight is cancelled?\nDOT Bot:If your flight is cancelled, most airlines will rebook you for free on their next flight to your destination as long as the flight has available seats. If your flight is cancelled and you choose to cancel your trip as a result, you are entitled to a refund for the unused transportation - even for non-refundable tickets.  You are also entitled to a refund for any bag fee that you paid, and any extras you may have purchased, such as a seat assignment. If the airline offers you a voucher for future travel instead of a refund, you should ask the airline about any restrictions that may apply, such as blackout and expiration dates, advanced booking requirements, and limits on number of seats.\nYou: can I fly with another airline if my flight gets cancelled?\nDOT Bot: Yes.  While airlines are not required to put you on another airline's flight, they can and sometimes do, so it does not hurt to politely ask your airline if it will transfer your ticket to another airline that has a flight with available seats. Ask the airline or check online to see if another carrier has open seats and then ask if the first airline will transfer your ticket to that carrier.  Remember, however, that airlines are not required to do this.  Also, be aware that finding available seats on another airline's flight may be difficult, especially during holidays and other peak travel times.\nYou: I would like to file a complaint\n DOT Bot: If you would like to file a complaint, please visit the Air Travel Service Complaint or Comment Form located via this link: https://airconsumer.dot.gov/escomplaint/ConsumerForm.cfm. Please note that the complaint form is not for concerns regarding Airline Safety or Security issues.\nYou: ${req.body.text}\nDOT Bot:`,
+    temperature: 0.5,
+    max_tokens: 250,
+    top_p: 0.3,
+    presence_penalty: 0.0,
+  });
+  res.status(200).json({ result: completion.data });
 }
